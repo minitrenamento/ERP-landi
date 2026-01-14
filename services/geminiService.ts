@@ -1,36 +1,40 @@
 
 import { GoogleGenAI } from "@google/genai";
 
+/**
+ * Serviço de análise inteligente utilizando a SDK oficial do Google GenAI.
+ * Otimizado para o modelo gemini-3-flash-preview.
+ */
 export const getSmartAnalysis = async (contextData: string, userQuery: string) => {
-  // Obtém a chave diretamente do ambiente conforme as diretrizes
+  // A chave de API deve ser configurada no Vercel como variável de ambiente API_KEY
   const apiKey = process.env.API_KEY;
 
   if (!apiKey) {
-    console.error("API Key não configurada no ambiente.");
-    return "Erro: Chave de API não configurada corretamente.";
+    console.error("ERRO: Variável de ambiente API_KEY não encontrada.");
+    return "Erro de configuração: Chave de API não encontrada no servidor.";
   }
 
-  // Inicializa o cliente conforme o padrão recomendado
+  // Inicialização imediata para garantir o uso da chave atualizada
   const ai = new GoogleGenAI({ apiKey });
 
   try {
     const prompt = `
-      Você é um Consultor Especialista em ERP da "Landi Consultores".
-      Analise os dados de negócio fornecidos abaixo e responda à pergunta do usuário ou forneça um insight estratégico.
-      
-      CONTEXTO DE DADOS:
+      Você é o Consultor Estratégico de ERP da "Landi Consultores", em Moçambique.
+      Sua tarefa é analisar os dados fornecidos e responder de forma profissional, executiva e prática.
+
+      DADOS DO SISTEMA (JSON):
       ${contextData}
 
-      PERGUNTA DO USUÁRIO:
+      PERGUNTA OU SOLICITAÇÃO DO USUÁRIO:
       ${userQuery}
 
-      Instruções de Resposta:
-      - Responda em Português de Moçambique.
-      - Seja profissional e direto.
-      - Use Markdown para formatação (negrito, listas).
+      REQUISITOS DA RESPOSTA:
+      1. Use Português de Moçambique (formal e cordial).
+      2. Formate a resposta exclusivamente em Markdown.
+      3. Seja conciso, mas forneça insights baseados nos dados.
+      4. Se houver problemas financeiros ou de estoque, destaque-os com emojis apropriados.
     `;
 
-    // Uso do modelo mais recente seguindo as diretrizes de codificação
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
@@ -40,10 +44,10 @@ export const getSmartAnalysis = async (contextData: string, userQuery: string) =
       },
     });
 
-    // Acessa a propriedade .text diretamente conforme a documentação atualizada
-    return response.text || "O consultor não conseguiu gerar uma análise no momento.";
+    // A propriedade .text é garantida na SDK estável @google/genai
+    return response.text || "O consultor não conseguiu processar os dados no momento.";
   } catch (error) {
-    console.error("Erro na análise do Gemini:", error);
-    return "Desculpe, ocorreu um erro ao processar sua solicitação com a IA.";
+    console.error("Erro na comunicação com Gemini API:", error);
+    return "Lamentamos, ocorreu um erro técnico ao processar sua análise. Por favor, tente novamente mais tarde.";
   }
 };
